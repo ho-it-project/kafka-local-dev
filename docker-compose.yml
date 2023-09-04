@@ -20,7 +20,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       CLUSTER_ID: "ciWo7IWazngRchmPES6q5A=="
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
-
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
   kafka2:
     image: confluentinc/cp-kafka
     container_name: kafka2
@@ -41,7 +41,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       CLUSTER_ID: "ciWo7IWazngRchmPES6q5A=="
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
-
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
   kafka3:
     image: confluentinc/cp-kafka
     container_name: kafka3
@@ -62,6 +62,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
       CLUSTER_ID: "ciWo7IWazngRchmPES6q5A=="
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
 
   schema-registry:
     image: confluentinc/cp-schema-registry
@@ -72,7 +73,8 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka1:29092,kafka2:29092,kafka3:29092"
-      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+      SCHEMA_REGISTRY_LISTENERS: "http://schema-registry:8081"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
     depends_on:
       - kafka1
       - kafka2
@@ -88,11 +90,25 @@ services:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:29092,kafka2:29092,kafka3:29092
       - kraft=true
-      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=kafka1:29092,kafka2:29092,kafka3:29092
+      - KAFKA_LOG_DIRS=/tmp/kraft-combined-logs
+      - KAFKA_CLUSTERS_0_SCHEMA_REGISTRY=http://schema-registry:8081
     depends_on:
       - kafka1
       - kafka2
       - kafka3
+
+  kafka-topic-creator:
+    image: confluentinc/cp-kafka:latest # Kafka 클라이언트 도구가 포함된 이미지
+    container_name: kafka-topic-creator
+    depends_on:
+      - kafka1
+      - kafka2
+      - kafka3
+    volumes:
+      - ./scripts/create-topics.sh:/create-topics.sh # 로컬 파일 시스템에서 스크립트를 마운트
+      - ./scripts/topics.txt:/topics.txt
+    command: ["bash", "/create-topics.sh"] # 컨테이너가 시작될 때 실행할 명령
+
 networks:
   default:
     name: my-network
