@@ -21,6 +21,7 @@ services:
       CLUSTER_ID: "ciWo7IWazngRchmPES6q5A=="
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+
   kafka2:
     image: confluentinc/cp-kafka
     container_name: kafka2
@@ -108,6 +109,26 @@ services:
       - ./scripts/create-topics.sh:/create-topics.sh # 로컬 파일 시스템에서 스크립트를 마운트
       - ./scripts/topics.txt:/topics.txt
     command: ["bash", "/create-topics.sh"] # 컨테이너가 시작될 때 실행할 명령
+
+  redis_container:
+    # 사용할 이미지
+    image: redis:latest
+    # 컨테이너명
+    container_name: redis_test
+    # 접근 포트 설정(컨테이너 외부:컨테이너 내부)
+    ports:
+      - 6379:6379
+    # 스토리지 마운트(볼륨) 설정
+    volumes:
+      - ./redis/data:/data
+      - ./redis/conf/redis.conf:/usr/local/conf/redis.conf
+    # 컨테이너에 docker label을 이용해서 메타데이터 추가
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    # 컨테이너 종료시 재시작 여부 설정
+    restart: always
+    command: redis-server /usr/local/conf/redis.conf
 
 networks:
   default:
