@@ -1,11 +1,11 @@
-ems.request.er 3 3
-ems.request.er.update 3 3
-ems.request.er.response 3 3
-er.response.ems 3 3
-er.request.er 3 3
-er.response.er 3 3
-er.bed 3 3
-er.status 3 3
-er.doctor 3 3
+ems-request-er 3 3
+ems-request-er-update 3 3
+ems-request-er-response 3 3
+er-response-ems 3 3
+er-request-er 3 3
+er-response-er 3 3
+er-bed 3 3
+er-status 3 3
+er-doctor 3 3
 er 3 3
 
